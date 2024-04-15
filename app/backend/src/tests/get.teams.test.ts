@@ -30,4 +30,6 @@ it('retorna um time pelo id', async function() {
   expect(status).to.equal(200);
   expect(body).to.deep.equal(team);
 });
+
+
 });

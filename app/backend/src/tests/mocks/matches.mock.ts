@@ -788,4 +788,6 @@ const filterMatchesMock = [
   }
 ]
 
-export { matchesMock, filterMatchesMock };
+const matchStatusMock = { status: 'SUCCESSFUL', data: matchesMock };
+
+export { matchesMock, filterMatchesMock, matchStatusMock };
