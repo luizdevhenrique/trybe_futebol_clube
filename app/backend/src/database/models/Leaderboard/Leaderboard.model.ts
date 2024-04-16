@@ -6,6 +6,27 @@ import MatchesModelSequelize from '../MatchesSequelize.models';
 
 export default class LeaderboardModel implements ILeaderboardModel {
   private model = MatchesModelSequelize;
+  public getEfficiency = (totalPoints: number, totalGames: number): number => {
+    const efficiency = (totalPoints / (totalGames * 3)) * 100;
+    return Number(efficiency.toFixed(2));
+  };
+
+  public sorted = (data: Array<any>): ILeaderboard[] => {
+    data.sort((a, b) => {
+      if (a.totalPoints !== b.totalPoints) {
+        return b.totalPoints - a.totalPoints;
+      }
+      if (a.totalVictories !== b.totalVictories) {
+        return b.totalVictories - a.totalVictories;
+      }
+      if (a.goalsBalance !== b.goalsBalance) {
+        return b.goalsBalance - a.goalsBalance;
+      }
+      return b.goalsFavor - a.goalsFavor;
+    });
+    return data;
+  };
+
   public convertArray = (data: Array<any>) => data.map((team) => ({
     name: team.teamName,
     totalPoints: this.totalPoints(Number(team.wins), Number(team.draws)),
@@ -15,6 +36,10 @@ export default class LeaderboardModel implements ILeaderboardModel {
     totalLosses: Number(team.loss),
     goalsFavor: Number(team.favorGoals),
     goalsOwn: Number(team.ownGoals),
+    goalsBalance: Number(team.favorGoals) - Number(team.ownGoals),
+    efficiency: this.getEfficiency(Number(this.totalPoints(Number(
+      team.wins,
+    ), Number(team.draws))), Number(team.matches)),
   }));
 
   public totalPoints = (wins: number, draws: number) => Number(Math.floor(
@@ -26,7 +51,8 @@ export default class LeaderboardModel implements ILeaderboardModel {
       type: QueryTypes.SELECT,
     }) as unknown[];
     const response = this.convertArray(home);
-    return response;
+    const sorted = this.sorted(response);
+    return sorted;
   }
 
   public async getAwayLeaderboard(): Promise<ILeaderboard[]> {
@@ -34,6 +60,7 @@ export default class LeaderboardModel implements ILeaderboardModel {
       type: QueryTypes.SELECT,
     }) as unknown[];
     const response = this.convertArray(away);
-    return response;
+    const sorted = this.sorted(response);
+    return sorted;
   }
 }
